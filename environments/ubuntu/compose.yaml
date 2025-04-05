@@ -1,0 +1,29 @@
+services:
+  ubuntu:
+    # Build settings
+    build: .
+    
+    # Basic settings
+    command: bash
+    tty: true
+    stdin_open: true
+    
+    # Volumes
+    volumes:
+      - ./workspace:/workspace/${USER_NAME:-ubuntu}
+    
+    # Environment variables
+    environment:
+      # User settings
+      - USER_NAME=${USER_NAME:-ubuntu}
+      - USER_UID=${USER_UID:-1000}
+      - USER_GID=${USER_GID:-1000}
+      - GROUP_NAME=${USER_NAME:-ubuntu}
+      - USER_PASSWORD=${USER_PASSWORD:-}
+      
+      # Git settings
+      - GIT_NAME=${GIT_NAME:-Your Name}
+      - GIT_EMAIL=${GIT_EMAIL:-your.email@example.com}
+      
+      # dotfiles
+      - DOTFILES=${DOTFILES:-}

@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-# 共通パッケージのインストール
+# Install common packages
 RUN apt-get update && apt-get install -y \
     sudo \
     software-properties-common \
@@ -12,14 +12,14 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Gitの最新版をインストール
+# Install latest version of Git
 RUN add-apt-repository ppa:git-core/ppa -y \
     && apt-get update \
     && apt-get install -y git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Neovim (最新安定版)
+# Neovim (latest stable version)
 RUN apt-get update && apt-get install -y \
     ninja-build \
     gettext \
@@ -54,14 +54,14 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Lazygit (最新安定版)
+# Lazygit (latest stable version)
 RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') \
     && curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" \
     && tar xf lazygit.tar.gz lazygit \
     && install lazygit /usr/local/bin/ \
     && rm -f lazygit lazygit.tar.gz
 
-# Oh-my-bash (ユーザー環境用)
+# Oh-my-bash (for user environment)
 RUN apt-get update && apt-get install -y \
     bash \
     && mkdir -p /etc/skel/.oh-my-bash \
@@ -79,14 +79,14 @@ RUN mkdir -p /etc/apt/keyrings \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Bun (最新安定版)
+# Bun (latest stable version)
 RUN curl -fsSL https://bun.sh/install | bash \
     && mkdir -p /usr/local/bun \
     && cp -r /root/.bun/* /usr/local/bun/ \
     && ln -sf /usr/local/bun/bin/bun /usr/local/bin/bun \
     && chmod -R 755 /usr/local/bun
 
-# 作業ディレクトリとエントリーポイント設定
+# Working directory and entrypoint setup
 RUN mkdir -p /workspace && chmod 777 /workspace
 COPY entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh

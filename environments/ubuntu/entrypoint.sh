@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-# ユーザー設定
+# User setup
 setup_user() {
-  # UID 1000のubuntuユーザーをリネームする場合
+  # Rename ubuntu user with UID 1000 if needed
   if [[ "$USER_UID" == "1000" && "$USER_NAME" != "ubuntu" ]]; then
     usermod -l "$USER_NAME" ubuntu
     groupmod -n "$GROUP_NAME" ubuntu
     
-    # ホームディレクトリの処理
+    # Handle home directory
     if [[ -d "/home/ubuntu" ]]; then
       mkdir -p "/home/$USER_NAME"
       cp -r /home/ubuntu/. "/home/$USER_NAME/"
@@ -17,21 +17,21 @@ setup_user() {
       usermod -d "/home/$USER_NAME" "$USER_NAME"
     fi
   else
-    # 新規ユーザー作成
+    # Create new user
     if ! getent passwd "$USER_UID" > /dev/null 2>&1; then
       groupadd -g "$USER_GID" "$GROUP_NAME" 2>/dev/null || true
       useradd -m -s /bin/bash -u "$USER_UID" -g "$USER_GID" "$USER_NAME" 2>/dev/null || true
     fi
   fi
 
-  # パスワード設定
+  # Set password
   if [[ -n "$USER_PASSWORD" ]]; then
     echo "$USER_NAME:$USER_PASSWORD" | chpasswd
   else
     passwd -d "$USER_NAME" >/dev/null 2>&1
   fi
 
-  # sudo権限の設定
+  # Configure sudo privileges
   if getent group sudo > /dev/null 2>&1; then
     usermod -aG sudo "$USER_NAME"
     echo "$USER_NAME ALL=(ALL) NOPASSWD: ALL" > "/etc/sudoers.d/$USER_NAME"
@@ -39,24 +39,24 @@ setup_user() {
   fi
 }
 
-# 設定ファイルの構成
+# Configure dotfiles
 setup_dotfiles() {
   local home_dir="/home/${USER_NAME}"
 
-  # .bashrcファイルの設定
+  # Set up .bashrc file
   if [[ ! -f "${home_dir}/.bashrc" ]]; then
     cp /etc/skel/.bashrc "${home_dir}/.bashrc"
     chown "${USER_NAME}:${GROUP_NAME}" "${home_dir}/.bashrc"
   fi
 
-  # Oh-my-bashの設定
+  # Oh-my-bash setup
   if [[ ! -d "${home_dir}/.oh-my-bash" ]]; then
     mkdir -p "${home_dir}/.oh-my-bash"
     cp -r /etc/skel/.oh-my-bash/* "${home_dir}/.oh-my-bash/"
     chown -R "${USER_NAME}:${GROUP_NAME}" "${home_dir}/.oh-my-bash"
   fi
 
-  # Git設定
+  # Git configuration
   if [[ -n "$GIT_NAME" && -n "$GIT_EMAIL" ]]; then
     su - "${USER_NAME}" -c "git config --global user.name \"$GIT_NAME\" && \
                         git config --global user.email \"$GIT_EMAIL\" && \
@@ -66,14 +66,14 @@ setup_dotfiles() {
                         git config --global color.ui auto"
   fi
 
-  # dotfilesリポジトリのクローンと設定
+  # Clone and set up dotfiles repository
   if [[ -n "$DOTFILES" ]]; then
     su - "${USER_NAME}" -c "git clone $DOTFILES ${home_dir}/dotfiles"
     
     if [[ -d "${home_dir}/dotfiles" ]]; then
       local dotfiles_dir="${home_dir}/dotfiles"
       
-      # 各設定ファイルのシンボリックリンク作成
+      # Create symbolic links for configuration files
       [[ -f "${dotfiles_dir}/bashrc" ]] && \
         rm -f "${home_dir}/.bashrc" && \
         ln -sf "${dotfiles_dir}/bashrc" "${home_dir}/.bashrc"
@@ -88,27 +88,27 @@ setup_dotfiles() {
       [[ -f "${dotfiles_dir}/inputrc" ]] && \
         ln -sf "${dotfiles_dir}/inputrc" "${home_dir}/.inputrc"
       
-      # 所有権設定
+      # Set ownership
       chown -R "${USER_NAME}:${GROUP_NAME}" "${home_dir}/.config" 2>/dev/null || true
       chown -h "${USER_NAME}:${GROUP_NAME}" "${home_dir}/.bashrc" "${home_dir}/.tmux.conf" "${home_dir}/.inputrc" 2>/dev/null || true
     fi
   fi
 }
 
-# ワークスペースの設定
+# Workspace setup
 setup_workspace() {
   local workspace_dir="/workspace/${USER_NAME}"
   mkdir -p "$workspace_dir"
   chown -R "${USER_NAME}:${GROUP_NAME}" "$workspace_dir"
 }
 
-# メイン処理
+# Main process
 main() {
-  echo "セットアップ開始: ユーザー '$USER_NAME' (UID:$USER_UID)"
+  echo "Starting setup: User '$USER_NAME' (UID:$USER_UID)"
   setup_user
   setup_dotfiles
   setup_workspace
-  echo "セットアップ完了"
+  echo "Setup completed"
   
   exec "$@"
 }
