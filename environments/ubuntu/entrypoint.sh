@@ -95,6 +95,24 @@ setup_dotfiles() {
   fi
 }
 
+# GitHub CLI setup
+setup_github_cli() {
+  local home_dir="/home/${USER_NAME}"
+  
+  # Check if GitHub token is provided
+  if [[ -n "$GITHUB_TOKEN" ]]; then
+    echo "Setting up GitHub CLI with provided token..."
+    # Create GitHub CLI config directory if it doesn't exist
+    mkdir -p "${home_dir}/.config/gh"
+    chown -R "${USER_NAME}:${GROUP_NAME}" "${home_dir}/.config/gh"
+    
+    # Authenticate with token
+    su - "${USER_NAME}" -c "echo '$GITHUB_TOKEN' | gh auth login --with-token"
+  else
+    echo "GitHub token not provided. You can authenticate manually with 'gh auth login'"
+  fi
+}
+
 # Workspace setup
 setup_workspace() {
   local workspace_dir="/workspace/${USER_NAME}"
@@ -102,11 +120,12 @@ setup_workspace() {
   chown -R "${USER_NAME}:${GROUP_NAME}" "$workspace_dir"
 }
 
-# Main process
+# Main function
 main() {
   echo "Starting setup: User '$USER_NAME' (UID:$USER_UID)"
   setup_user
   setup_dotfiles
+  setup_github_cli
   setup_workspace
   echo "Setup completed"
   

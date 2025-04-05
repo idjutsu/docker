@@ -25,5 +25,8 @@ services:
       - GIT_NAME=${GIT_NAME:-Your Name}
       - GIT_EMAIL=${GIT_EMAIL:-your.email@example.com}
       
-      # dotfiles
+      # GitHub CLI settings
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      
+      # Dotfiles
       - DOTFILES=${DOTFILES:-}
