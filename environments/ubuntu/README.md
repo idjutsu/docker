@@ -11,8 +11,11 @@ The following environment variables can be customized:
 - `USER_PASSWORD`: User password (default: none)
 - `GIT_NAME`: Git username (default: `Your Name`)
 - `GIT_EMAIL`: Git email address (default: `your.email@example.com`)
-- `GITHUB_TOKEN`: GitHub personal access token for GitHub CLI authentication (default: none)
 - `DOTFILES`: URL of dotfiles repository (default: none)
+
+### BASH Environment Variables
+
+Environment variables with the `BASH_` prefix are stored in `~/.env`.
 
 ## Workspace
 
